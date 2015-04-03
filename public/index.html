@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>My Form</title>
+
+		<!-- EXTERNAL LIBRARIES -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script type="text/javascript" src="js/validator.min.js"></script>
+
+		<!-- STYLES -->
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+		<!-- Validate and submit form data -->
+		<script type="text/javascript">
+			$(document).ready(function(){
+				
+				// Handler for the "Submit" button
+				document.getElementById ("submitFormBtn").addEventListener ("click", submitFormData, false);
+
+				function submitFormData(){
+					// Get inserted values to validate
+					var name = document.getElementById("formName").value;
+					var address = document.getElementById("formAddress").value;
+					var occupation = document.getElementById("formOccupation").value;
+
+					validateSubmittedData(name, address, occupation);
+				};
+
+				function validateSubmittedData(name, address, occupation){
+
+					console.log("Validating submitted data...");
+
+					// If "name" or "address" fields are empty, display error message
+
+					if( (validator.isNull(name) == true) || (validator.isNull(address) == true) ){
+						var errorField = document.getElementById("displaySubmitError");
+						errorField.innerHTML = "Name and address fields are mandatory !";
+						errorField.style.visibility = "visible";
+					}
+					else{
+						// Convert data to JSON
+						//var formData = JSON.stringify($("#myForm").serializeArray());
+
+       	 				var form = document.getElementById("myForm");
+						var formLength = form.length;
+						var obj = {};
+
+						for(var i = 0; i < formLength - 1; i += 1) {
+						    obj[form[i].name] = form[i].value;
+						}
+
+						var jsonFormData = JSON.stringify(obj);
+
+						// Send AJAX request to the server with the inserted data
+						$.ajax({
+							type: "POST",
+							url: "/people",
+							data: jsonFormData,
+							contentType: "application/json",
+							success: function(){
+								alert("Data submitted successfuly !");
+							},
+							error: function(textstatus, errorThrown) {
+			            		alert("An error occured while sending data: 'text status:' " + textstatus + ", 'err: ' " + errorThrown);
+							}
+						});
+
+						// Clear form fields
+						document.getElementById("displaySubmitError").innerHTML = "";
+						document.getElementById("myForm").reset();
+					}
+				};
+			});
+		</script>
+
+	</head>
+
+	<body> 
+		<div id="form-wrapper">
+			<form id="myForm" class="vertically-centered">
+				<p> Name </p>
+				<input type="text"  name="name" id="formName" autocomplete="off"/> 
+
+				<p> Address</p> 
+				<input type="text" name="address" id="formAddress" autocomplete="off"/>
+
+				<p>Occupation </p>
+				<input type="text" name="occupation" id="formOccupation"/>
+
+				<p> Birthday </p>
+				<input type="date" name="bday"/>
+
+				<!-- If the mandatory form fields are null, display a message here -->
+				<p id="displaySubmitError"><p>
+				<input type="button" value="Submit" id="submitFormBtn"/>
+			</form>
+		</div>
+	</body>
+</html>
