@@ -18,18 +18,31 @@
 				// Handler for the "Submit" button
 				document.getElementById ("submitFormBtn").addEventListener ("click", submitFormData, false);
 
+				function calculateAge(dateString) {
+					var birthdate = new Date(dateString);
+					var currentDate = new Date();
+					// In milliseconds
+					var diff = currentDate - birthdate;
+					var age = Math.floor(diff/31536000000); 
+					return age;
+				};
+
 				function submitFormData(){
+
 					// Get inserted values to validate
 					var name = document.getElementById("formName").value;
 					var address = document.getElementById("formAddress").value;
 					var occupation = document.getElementById("formOccupation").value;
+					var bday = document.getElementById("formBday").value;
 
-					validateSubmittedData(name, address, occupation);
+					validateSubmittedData(name, address, occupation, bday);
 				};
 
-				function validateSubmittedData(name, address, occupation){
+				function validateSubmittedData(name, address, occupation, bday){
 
 					console.log("Validating submitted data...");
+
+					var age = calculateAge(bday);
 
 					// If "name" or "address" fields are empty, display error message
 
@@ -39,36 +52,45 @@
 						errorField.style.visibility = "visible";
 					}
 					else{
-						// Convert data to JSON
-						//var formData = JSON.stringify($("#myForm").serializeArray());
+						// If user age is under 18, display warning message
 
-       	 				var form = document.getElementById("myForm");
-						var formLength = form.length;
-						var obj = {};
-
-						for(var i = 0; i < formLength - 1; i += 1) {
-						    obj[form[i].name] = form[i].value;
+						if(age < 18){
+							var errorField = document.getElementById("displaySubmitError");
+							errorField.innerHTML = "Age must be over 18 to proceed !";
+							errorField.style.visibility = "visible";
 						}
+						else{
+							// If all inserted data is valid, convert data to JSON
+							//var formData = JSON.stringify($("#myForm").serializeArray());
 
-						var jsonFormData = JSON.stringify(obj);
+	       	 				var form = document.getElementById("myForm");
+							var formLength = form.length;
+							var obj = {};
 
-						// Send AJAX request to the server with the inserted data
-						$.ajax({
-							type: "POST",
-							url: "/people",
-							data: jsonFormData,
-							contentType: "application/json",
-							success: function(){
-								alert("Data submitted successfuly !");
-							},
-							error: function(textstatus, errorThrown) {
-			            		alert("An error occured while sending data: 'text status:' " + textstatus + ", 'err: ' " + errorThrown);
+							for(var i = 0; i < formLength - 1; i += 1) {
+							    obj[form[i].name] = form[i].value;
 							}
-						});
 
-						// Clear form fields
-						document.getElementById("displaySubmitError").innerHTML = "";
-						document.getElementById("myForm").reset();
+							var jsonFormData = JSON.stringify(obj);
+
+							// and send AJAX request to the server with the data
+							$.ajax({
+								type: "POST",
+								url: "/people",
+								data: jsonFormData,
+								contentType: "application/json",
+								success: function(){
+									alert("Data submitted successfuly !");
+								},
+								error: function(textstatus, errorThrown) {
+				            		alert("An error occured while sending data: 'text status:' " + textstatus + ", 'err: ' " + errorThrown);
+								}
+							});
+
+							// Clear form fields
+							document.getElementById("displaySubmitError").innerHTML = "";
+							document.getElementById("myForm").reset();
+						}
 					}
 				};
 			});
@@ -89,9 +111,9 @@
 				<input type="text" name="occupation" id="formOccupation"/>
 
 				<p> Birthday </p>
-				<input type="date" name="bday"/>
+				<input type="date" name="bday" id="formBday"/>
 
-				<!-- If the mandatory form fields are null, display a message here -->
+				<!-- If the mandatory form fields are null or the age is under 18, display a message here -->
 				<p id="displaySubmitError"><p>
 				<input type="button" value="Submit" id="submitFormBtn"/>
 			</form>
