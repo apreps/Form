@@ -41,8 +41,14 @@
 				function validateSubmittedData(name, address, occupation, bday){
 
 					console.log("Validating submitted data...");
+					var age;
 
-					var age = calculateAge(bday);
+					if(bday == ""){
+						age = 0;
+					}
+					else{
+						age = calculateAge(bday);
+					}
 
 					// If "name" or "address" fields are empty, display error message
 
